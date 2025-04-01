@@ -1,96 +1,87 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cadastro de Pessoas</title>
-  <style>
-    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
-    form { display: flex; flex-direction: column; gap: 10px; }
-    input, button { padding: 8px; font-size: 16px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-  </style>
 </head>
 <body>
   <h1>Cadastro de Pessoas</h1>
-  <form id="pessoa-form">
+
+  <form id="formPessoa">
     <input type="text" id="nome" placeholder="Nome" required />
     <input type="text" id="sobrenome" placeholder="Sobrenome" required />
-    <input type="date" id="nascimento" required />
+    <input type="date" id="nascimento" placeholder="Data de Nascimento" required />
     <button type="submit">Salvar</button>
   </form>
 
   <h2>Lista de Pessoas</h2>
-  <table id="tabela-pessoas">
+  <table border="1">
     <thead>
       <tr>
+        <th>ID</th>
         <th>Nome</th>
         <th>Sobrenome</th>
         <th>Nascimento</th>
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="tabelaPessoas"></tbody>
   </table>
 
   <script>
-    const form = document.getElementById("pessoa-form");
-    const tabela = document.querySelector("#tabela-pessoas tbody");
+    const API_URL = "http://backend:3000";
     let editandoId = null;
 
     async function carregarPessoas() {
-      const res = await fetch("/pessoas");
+      const res = await fetch(`${API_URL}/pessoas`);
       const pessoas = await res.json();
+      const tabela = document.getElementById("tabelaPessoas");
       tabela.innerHTML = "";
-      pessoas.forEach(p => {
-        tabela.innerHTML += `
-          <tr>
-            <td>${p.nome}</td>
-            <td>${p.sobrenome}</td>
-            <td>${new Date(p.nascimento).toLocaleDateString()}</td>
-            <td>
-              <button onclick="editarPessoa(${p.id})">Editar</button>
-              <button onclick="deletarPessoa(${p.id})">Deletar</button>
-            </td>
-          </tr>
+      pessoas.forEach(pessoa => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${pessoa.id}</td>
+          <td>${pessoa.nome}</td>
+          <td>${pessoa.sobrenome}</td>
+          <td>${new Date(pessoa.nascimento).toLocaleDateString()}</td>
+          <td>
+            <button onclick="editarPessoa(${pessoa.id})">Editar</button>
+            <button onclick="deletarPessoa(${pessoa.id})">Excluir</button>
+          </td>
         `;
+        tabela.appendChild(tr);
       });
     }
 
-    form.addEventListener("submit", async (e) => {
+    document.getElementById("formPessoa").addEventListener("submit", async e => {
       e.preventDefault();
-      const dados = {
-        nome: document.getElementById("nome").value,
-        sobrenome: document.getElementById("sobrenome").value,
-        nascimento: document.getElementById("nascimento").value,
-      };
-
-      const url = editandoId ? `/pessoas/${editandoId}` : "/pessoas";
+      const nome = document.getElementById("nome").value;
+      const sobrenome = document.getElementById("sobrenome").value;
+      const nascimento = document.getElementById("nascimento").value;
+      const url = editandoId ? `${API_URL}/pessoas/${editandoId}` : `${API_URL}/pessoas`;
       const metodo = editandoId ? "PUT" : "POST";
-
       await fetch(url, {
         method: metodo,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
+        body: JSON.stringify({ nome, sobrenome, nascimento })
       });
-
-      form.reset();
       editandoId = null;
+      e.target.reset();
       carregarPessoas();
     });
 
     async function editarPessoa(id) {
-      const res = await fetch(`/pessoas/${id}`);
-      const p = await res.json();
-      document.getElementById("nome").value = p.nome;
-      document.getElementById("sobrenome").value = p.sobrenome;
-      document.getElementById("nascimento").value = p.nascimento.slice(0, 10);
+      const res = await fetch(`${API_URL}/pessoas/${id}`);
+      const pessoa = await res.json();
+      document.getElementById("nome").value = pessoa.nome;
+      document.getElementById("sobrenome").value = pessoa.sobrenome;
+      document.getElementById("nascimento").value = pessoa.nascimento.split("T")[0];
       editandoId = id;
     }
 
     async function deletarPessoa(id) {
-      await fetch(`/pessoas/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/pessoas/${id}`, { method: "DELETE" });
       carregarPessoas();
     }
 
