@@ -40,7 +40,7 @@
     let editandoId = null;
 
     async function carregarPessoas() {
-      const res = await fetch("http://localhost:3000/pessoas");
+      const res = await fetch("/pessoas");
       const pessoas = await res.json();
       tabela.innerHTML = "";
       pessoas.forEach(p => {
@@ -66,7 +66,7 @@
         nascimento: document.getElementById("nascimento").value,
       };
 
-      const url = editandoId ? `http://localhost:3000/pessoas/${editandoId}` : "http://localhost:3000/pessoas";
+      const url = editandoId ? `/pessoas/${editandoId}` : "/pessoas";
       const metodo = editandoId ? "PUT" : "POST";
 
       await fetch(url, {
@@ -81,7 +81,7 @@
     });
 
     async function editarPessoa(id) {
-      const res = await fetch(`http://localhost:3000/pessoas/${id}`);
+      const res = await fetch(`/pessoas/${id}`);
       const p = await res.json();
       document.getElementById("nome").value = p.nome;
       document.getElementById("sobrenome").value = p.sobrenome;
@@ -90,7 +90,7 @@
     }
 
     async function deletarPessoa(id) {
-      await fetch(`http://localhost:3000/pessoas/${id}`, { method: "DELETE" });
+      await fetch(`/pessoas/${id}`, { method: "DELETE" });
       carregarPessoas();
     }
 
