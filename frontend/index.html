@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro de Pessoas</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    form { display: flex; flex-direction: column; gap: 10px; }
+    input, button { padding: 8px; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Cadastro de Pessoas</h1>
+  <form id="pessoa-form">
+    <input type="text" id="nome" placeholder="Nome" required />
+    <input type="text" id="sobrenome" placeholder="Sobrenome" required />
+    <input type="date" id="nascimento" required />
+    <button type="submit">Salvar</button>
+  </form>
+
+  <h2>Lista de Pessoas</h2>
+  <table id="tabela-pessoas">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Sobrenome</th>
+        <th>Nascimento</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById("pessoa-form");
+    const tabela = document.querySelector("#tabela-pessoas tbody");
+    let editandoId = null;
+
+    async function carregarPessoas() {
+      const res = await fetch("http://localhost:3000/pessoas");
+      const pessoas = await res.json();
+      tabela.innerHTML = "";
+      pessoas.forEach(p => {
+        tabela.innerHTML += `
+          <tr>
+            <td>${p.nome}</td>
+            <td>${p.sobrenome}</td>
+            <td>${new Date(p.nascimento).toLocaleDateString()}</td>
+            <td>
+              <button onclick="editarPessoa(${p.id})">Editar</button>
+              <button onclick="deletarPessoa(${p.id})">Deletar</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const dados = {
+        nome: document.getElementById("nome").value,
+        sobrenome: document.getElementById("sobrenome").value,
+        nascimento: document.getElementById("nascimento").value,
+      };
+
+      const url = editandoId ? `http://localhost:3000/pessoas/${editandoId}` : "http://localhost:3000/pessoas";
+      const metodo = editandoId ? "PUT" : "POST";
+
+      await fetch(url, {
+        method: metodo,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados),
+      });
+
+      form.reset();
+      editandoId = null;
+      carregarPessoas();
+    });
+
+    async function editarPessoa(id) {
+      const res = await fetch(`http://localhost:3000/pessoas/${id}`);
+      const p = await res.json();
+      document.getElementById("nome").value = p.nome;
+      document.getElementById("sobrenome").value = p.sobrenome;
+      document.getElementById("nascimento").value = p.nascimento.slice(0, 10);
+      editandoId = id;
+    }
+
+    async function deletarPessoa(id) {
+      await fetch(`http://localhost:3000/pessoas/${id}`, { method: "DELETE" });
+      carregarPessoas();
+    }
+
+    carregarPessoas();
+  </script>
+</body>
+</html>
