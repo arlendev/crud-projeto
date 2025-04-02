@@ -7,6 +7,7 @@
 </head>
 <body>
   <h1>Cadastro de Pessoas</h1>
+
   <form id="form">
     <input type="text" id="nome" placeholder="Nome" required />
     <input type="text" id="sobrenome" placeholder="Sobrenome" required />
@@ -25,32 +26,31 @@
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="pessoas"></tbody>
+    <tbody id="tabela"></tbody>
   </table>
 
   <script>
+    const API_URL = "https://dx-algorithm-four-ocean.trycloudflare.com";
     const form = document.getElementById("form");
-    const tbody = document.getElementById("pessoas");
+    const tabela = document.getElementById("tabela");
     let editandoId = null;
 
     async function carregarPessoas() {
-      const res = await fetch("/pessoas");
+      const res = await fetch(`${API_URL}/pessoas`);
       const pessoas = await res.json();
-
-      tbody.innerHTML = "";
-      pessoas.forEach((pessoa) => {
+      tabela.innerHTML = "";
+      pessoas.forEach((p) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${pessoa.id}</td>
-          <td>${pessoa.nome}</td>
-          <td>${pessoa.sobrenome}</td>
-          <td>${pessoa.nascimento}</td>
+          <td>${p.id}</td>
+          <td>${p.nome}</td>
+          <td>${p.sobrenome}</td>
+          <td>${p.nascimento}</td>
           <td>
-            <button onclick="editarPessoa(${pessoa.id})">Editar</button>
-            <button onclick="deletarPessoa(${pessoa.id})">Excluir</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+            <button onclick="editarPessoa(${p.id})">Editar</button>
+            <button onclick="excluirPessoa(${p.id})">Excluir</button>
+          </td>`;
+        tabela.appendChild(tr);
       });
     }
 
@@ -62,7 +62,7 @@
         nascimento: document.getElementById("nascimento").value,
       };
 
-      const url = editandoId ? `/pessoas/${editandoId}` : `/pessoas`;
+      const url = editandoId ? `${API_URL}/pessoas/${editandoId}` : `${API_URL}/pessoas`;
       const metodo = editandoId ? "PUT" : "POST";
 
       await fetch(url, {
@@ -77,17 +77,16 @@
     });
 
     async function editarPessoa(id) {
-      const res = await fetch(`/pessoas/${id}`);
-      const d = await res.json();
-
-      document.getElementById("nome").value = d.nome;
-      document.getElementById("sobrenome").value = d.sobrenome;
-      document.getElementById("nascimento").value = d.nascimento;
+      const res = await fetch(`${API_URL}/pessoas/${id}`);
+      const p = await res.json();
+      document.getElementById("nome").value = p.nome;
+      document.getElementById("sobrenome").value = p.sobrenome;
+      document.getElementById("nascimento").value = p.nascimento;
       editandoId = id;
     }
 
-    async function deletarPessoa(id) {
-      await fetch(`/pessoas/${id}`, { method: "DELETE" });
+    async function excluirPessoa(id) {
+      await fetch(`${API_URL}/pessoas/${id}`, { method: "DELETE" });
       carregarPessoas();
     }
 
