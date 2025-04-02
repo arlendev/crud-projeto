@@ -8,6 +8,6 @@ app.use(express.json());
 
 app.use('/pessoas', pessoasRoutes);
 
-app.listen(3000, () => {
-  console.log('Servidor rodando em http://localhost:3000');
+app.listen(3000, '0.0.0.0', () => {
+  console.log('Servidor rodando em http://0.0.0.0:3000');
 });
