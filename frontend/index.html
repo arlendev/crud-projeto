@@ -62,7 +62,9 @@
         nascimento: document.getElementById("nascimento").value,
       };
 
-      const url = editandoId ? `/pessoas/${editandoId}` : `/pessoas`;
+      const url = editandoId
+        ? "http://backend:3000/pessoas/" + editandoId
+        : "http://backend:3000/pessoas";
       const metodo = editandoId ? "PUT" : "POST";
 
       await fetch(url, {
@@ -77,7 +79,7 @@
     });
 
     async function editarPessoa(id) {
-      const res = await fetch(`/pessoas/${id}`);
+      const res = await fetch(`http://backend:3000/pessoas/${id}`);
       const d = await res.json();
 
       document.getElementById("nome").value = d.nome;
