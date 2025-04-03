@@ -3,7 +3,12 @@ const cors = require('cors');
 const pessoasRoutes = require('./routes/pessoas');
 
 const app = express();
-app.use(cors());
+
+// Libera CORS apenas para seu domínio
+app.use(cors({
+  origin: 'https://physiosuivi.xyz'
+}));
+
 app.use(express.json());
 
 app.use('/pessoas', pessoasRoutes);
