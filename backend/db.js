@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const conexao = mysql.createConnection({
   host: process.env.DB_HOST || 'mysql', // ✅ aqui é o nome do serviço no docker-compose
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASSWORD || 'root',
   database: process.env.DB_NAME || 'crud_pessoas'
 });
 
