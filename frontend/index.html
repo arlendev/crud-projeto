@@ -25,12 +25,15 @@
     <tbody id="tabela"></tbody>
   </table>
 
+  <p id="mensagem" style="color: red;"></p>
+
   <script>
     const API_URL = "https://physiosuivi.xyz/pessoas";
 
     async function carregarPessoas() {
       try {
         const res = await fetch(API_URL);
+        if (!res.ok) throw new Error("Erro na resposta da API");
         const pessoas = await res.json();
         const tabela = document.getElementById("tabela");
         tabela.innerHTML = "";
@@ -48,7 +51,9 @@
           `;
           tabela.appendChild(tr);
         });
+        document.getElementById("mensagem").innerText = "";
       } catch (error) {
+        document.getElementById("mensagem").innerText = "Erro ao carregar pessoas. Verifique a conexão com a API.";
         console.error("Erro ao carregar pessoas:", error);
       }
     }
@@ -60,22 +65,26 @@
         nascimento: document.getElementById("nascimento").value
       };
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(pessoa)
         });
+        if (!res.ok) throw new Error("Erro ao salvar pessoa");
         carregarPessoas();
       } catch (error) {
+        document.getElementById("mensagem").innerText = "Erro ao salvar pessoa.";
         console.error("Erro ao salvar:", error);
       }
     }
 
     async function excluir(id) {
       try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Erro ao excluir pessoa");
         carregarPessoas();
       } catch (error) {
+        document.getElementById("mensagem").innerText = "Erro ao excluir pessoa.";
         console.error("Erro ao excluir:", error);
       }
     }
